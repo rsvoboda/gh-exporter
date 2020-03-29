@@ -29,7 +29,6 @@ public class GHRepositoryBaseMetrics {
     public void initiateGH(String gitHubToken) {
         try {
             github = new GitHubBuilder().withOAuthToken(gitHubToken).build();
-            log.info("GH constructed - " + gitHubToken);
         } catch (IOException e) {
             log.error("Token was rejected", e);
         }
@@ -42,7 +41,7 @@ public class GHRepositoryBaseMetrics {
     public void ghBaseMetrics(MetricRegistry registry, String repositoryName, Tag... tags) {
         registry.register(
                 new ExtendedMetadataBuilder()
-                        .withName("gh_stars")
+                        .withName("gh_repo_stars")
                         .withType(MetricType.GAUGE)
                         .withDescription("Total number of Stars for given repository")
                         .skipsScopeInOpenMetricsExportCompletely(true)
@@ -51,14 +50,49 @@ public class GHRepositoryBaseMetrics {
                 (Gauge<Number>) () -> getGHRepository(repositoryName).getStargazersCount(),
                 tags);
 
-        /* TODO
-        contributors
-        commits
-        issues+PRs
-        releases
-        watchers
-        forks
-         */
+        registry.register(
+                new ExtendedMetadataBuilder()
+                        .withName("gh_repo_open_issues_and_prs")
+                        .withType(MetricType.GAUGE)
+                        .withDescription("Total number of open issues and PRs for given repository")
+                        .skipsScopeInOpenMetricsExportCompletely(true)
+                        .prependsScopeToOpenMetricsName(false)
+                        .build(),
+                (Gauge<Number>) () -> getGHRepository(repositoryName).getOpenIssueCount(),
+                tags);
+
+        registry.register(
+                new ExtendedMetadataBuilder()
+                        .withName("gh_repo_forks")
+                        .withType(MetricType.GAUGE)
+                        .withDescription("Total number of forks for given repository")
+                        .skipsScopeInOpenMetricsExportCompletely(true)
+                        .prependsScopeToOpenMetricsName(false)
+                        .build(),
+                (Gauge<Number>) () -> getGHRepository(repositoryName).getForksCount(),
+                tags);
+
+        registry.register(
+                new ExtendedMetadataBuilder()
+                        .withName("gh_repo_subscribers")
+                        .withType(MetricType.GAUGE)
+                        .withDescription("Total number of watchers/subscribers for given repository")
+                        .skipsScopeInOpenMetricsExportCompletely(true)
+                        .prependsScopeToOpenMetricsName(false)
+                        .build(),
+                (Gauge<Number>) () -> getGHRepository(repositoryName).getSubscribersCount(),
+                tags);
+
+        registry.register(
+                new ExtendedMetadataBuilder()
+                        .withName("gh_repo_size")
+                        .withType(MetricType.GAUGE)
+                        .withDescription("Size in kB for given repository")
+                        .skipsScopeInOpenMetricsExportCompletely(true)
+                        .prependsScopeToOpenMetricsName(false)
+                        .build(),
+                (Gauge<Number>) () -> getGHRepository(repositoryName).getSize(),
+                tags);
     }
 
     public void rateLimits(MetricRegistry registry) {

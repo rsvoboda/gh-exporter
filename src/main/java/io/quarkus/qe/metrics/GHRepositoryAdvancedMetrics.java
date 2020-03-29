@@ -44,6 +44,12 @@ public class GHRepositoryAdvancedMetrics {
           - issues
             - bug vs. feature vs. enhancement vs. question
         */
+
+        /* Moved from Basic
+        contributors  ...  getGHRepository(repositoryName).listContributors()
+        commits ... getGHRepository(repositoryName).listCommits()
+        releases ... getGHRepository(repositoryName).listReleases().iterator
+         */
     }
 
 }
