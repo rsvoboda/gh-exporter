@@ -18,6 +18,8 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 import java.io.IOException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -37,6 +39,9 @@ public class GitHubMetrics {
     @Inject
     GHRepositoryBaseMetrics ghRepositoryBaseMetrics;
 
+    @Inject
+    GHRepositoryAdvancedMetrics ghRepositoryAdvancedMetrics;
+
     private static final Logger log = Logger.getLogger(GitHubMetrics.class);
 
     void onStart(@Observes StartupEvent ev) throws IOException {
@@ -49,6 +54,7 @@ public class GitHubMetrics {
         if (! ghRepositoryBaseMetrics.isGHInitiated()) {
             return;
         }
+        ghRepositoryAdvancedMetrics.initiateGH(gitHubToken);
 
         for (String repo : ghRepos) {
             String repositoryName = repo.trim();
@@ -59,6 +65,7 @@ public class GitHubMetrics {
 //            log.info(repository.getPullRequests(GHIssueState.OPEN).size());
 
             ghRepositoryBaseMetrics.ghBaseMetrics(registry, repositoryName, repositoryTag);
+            ghRepositoryAdvancedMetrics.ghAdvancedMetrics(registry, repositoryName, repositoryTag);
         }
 
         ghRepositoryBaseMetrics.rateLimits(registry);
