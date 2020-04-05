@@ -2,7 +2,6 @@ package io.quarkus.qe.metrics;
 
 import io.quarkus.scheduler.Scheduled;
 import io.smallrye.metrics.ExtendedMetadataBuilder;
-import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.eclipse.microprofile.metrics.Gauge;
 import org.eclipse.microprofile.metrics.MetricRegistry;
 import org.eclipse.microprofile.metrics.MetricType;
@@ -26,9 +25,9 @@ public class GHRepositoryBaseMetrics {
     private static final Logger log = Logger.getLogger(GHRepositoryBaseMetrics.class);
     private GitHub github;
 
-    public void initiateGH(String gitHubToken) {
+    public void initiateGH(String ghToken) {
         try {
-            github = new GitHubBuilder().withOAuthToken(gitHubToken).build();
+            github = new GitHubBuilder().withOAuthToken(ghToken).build();
         } catch (IOException e) {
             log.error("Token was rejected", e);
         }
@@ -95,7 +94,7 @@ public class GHRepositoryBaseMetrics {
                 tags);
     }
 
-    public void rateLimits(MetricRegistry registry) {
+    public void ghRateLimitMetrics(MetricRegistry registry) {
         registry.register(
                 new ExtendedMetadataBuilder()
                         .withName("gh_rate_remaining")
