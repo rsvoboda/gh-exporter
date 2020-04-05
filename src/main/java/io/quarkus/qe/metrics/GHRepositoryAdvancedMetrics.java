@@ -1,23 +1,20 @@
 package io.quarkus.qe.metrics;
 
-import io.quarkus.scheduler.Scheduled;
 import io.smallrye.metrics.ExtendedMetadataBuilder;
 import org.eclipse.microprofile.metrics.Gauge;
 import org.eclipse.microprofile.metrics.MetricRegistry;
 import org.eclipse.microprofile.metrics.MetricType;
 import org.eclipse.microprofile.metrics.Tag;
 import org.jboss.logging.Logger;
-import org.kohsuke.github.GHRepository;
-import org.kohsuke.github.GitHub;
-import org.kohsuke.github.GitHubBuilder;
 
 import javax.enterprise.context.ApplicationScoped;
+import javax.json.Json;
+import javax.json.JsonObject;
+import javax.json.JsonReader;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * Metrics based on direct curl-like interaction with GitHub
@@ -38,14 +35,13 @@ public class GHRepositoryAdvancedMetrics {
     public void ghAdvancedMetrics(MetricRegistry registry, String repositoryName, Tag... tags) {
 
         try {
-            URL openPRsURL = new URL("https://api.github.com/repos/" + repositoryName + "/pulls?per_page=1");
-            URL closedPRsURL = new URL("https://api.github.com/repos/" + repositoryName + "/pulls?per_page=1&state=closed");
-            URL openIssuesURL = new URL("https://api.github.com/repos/" + repositoryName + "/issues?per_page=1");
-            URL closedIssuesURL = new URL("https://api.github.com/repos/" + repositoryName + "/issues?per_page=1&state=closed");
-
             URL contributorsURL = new URL("https://api.github.com/repos/" + repositoryName + "/contributors?per_page=1");
             URL commitsURL = new URL("https://api.github.com/repos/" + repositoryName + "/commits?per_page=1");
             URL tagsURL = new URL("https://api.github.com/repos/" + repositoryName + "/tags?per_page=1");
+
+            registerMetric("gh_repo_contributors", "Total number of contributors for given repository", contributorsURL, registry, tags);
+            registerMetric("gh_repo_commits", "Total number of commits for given repository", commitsURL, registry, tags);
+            registerMetric("gh_repo_tags", "Total number of tags/releases for given repository", tagsURL, registry, tags);
 
             /*
             kind%2Fquestion
@@ -58,26 +54,21 @@ public class GHRepositoryAdvancedMetrics {
             System.out.println(URLEncoder.encode("kind/extension-proposal", StandardCharsets.UTF_8));
 
 https://api.github.com/search/issues?q=repo:quarkusio/quarkus+is:pr+is:open+label:kind/enhancement
-
-https://api.github.com/search/issues?q=repo:quarkusio/quarkus+is:pr+is:open&per_page=1
-https://api.github.com/search/issues?q=repo:quarkusio/quarkus+is:pr+is:closed&per_page=1
-
-https://api.github.com/search/issues?q=repo:quarkusio/quarkus+is:pr+is:merged&per_page=1
-https://api.github.com/search/issues?q=repo:quarkusio/quarkus+is:issue+is:open&per_page=1
-https://api.github.com/search/issues?q=repo:quarkusio/quarkus+is:issue+is:closed&per_page=1
-   <https://api.github.com/search/issues?q=repo%3Aquarkusio%2Fquarkus+is%3Aissue+is%3Aclosed&per_page=1&page=2>; rel="next", <https://api.github.com/search/issues?q=repo%3Aquarkusio%2Fquarkus+is%3Aissue+is%3Aclosed&per_page=1&page=1000>; rel="last"
-   "total_count": 2694,
             */
 
-            registerMetric("gh_repo_contributors", "Total number of contributors for given repository", contributorsURL, registry, tags);
-            registerMetric("gh_repo_commits", "Total number of commits for given repository", commitsURL, registry, tags);
-            registerMetric("gh_repo_tags", "Total number of tags/releases for given repository", tagsURL, registry, tags);
+            URL openPRsURL = new URL("https://api.github.com/repos/" + repositoryName + "/pulls?per_page=1");
+            URL closedPRsURL = new URL("https://api.github.com/repos/" + repositoryName + "/pulls?per_page=1&state=closed");
+            URL mergedPRsURL = new URL("https://api.github.com/search/issues?q=repo:" + repositoryName + "+is:pr+is:merged&per_page=1");
+
+            URL openIssuesURL = new URL("https://api.github.com/search/issues?q=repo:" + repositoryName + "+is:issue+is:open&per_page=1");
+            URL closedIssuesURL = new URL("https://api.github.com/search/issues?q=repo:" + repositoryName + "+is:issue+is:closed&per_page=1");
 
             registerMetric("gh_repo_open_prs", "Total number of open PRs for given repository", openPRsURL, registry, tags);
             registerMetric("gh_repo_closed_prs", "Total number of closed PRs for given repository", closedPRsURL, registry, tags);
+            registerMetric("gh_repo_merged_prs", "Total number of merged PRs for given repository", mergedPRsURL, registry, tags);
 
-            registerMetric("gh_repo_open_issues", "Total number of open issues for given repository", openIssuesURL, openPRsURL, registry, tags);
-            registerMetric("gh_repo_closed_issues", "Total number of closed issues for given repository", closedIssuesURL, closedPRsURL, registry, tags);
+            registerMetric("gh_repo_open_issues", "Total number of open issues for given repository", openIssuesURL, registry, tags);
+            registerMetric("gh_repo_closed_issues", "Total number of closed issues for given repository", closedIssuesURL, registry, tags);
 
         } catch (MalformedURLException e) {
             log.error("Malformed URL", e);
@@ -97,28 +88,29 @@ https://api.github.com/search/issues?q=repo:quarkusio/quarkus+is:issue+is:closed
     }
 
     private void registerMetric(String name, String description, URL url, MetricRegistry registry, Tag... tags) {
-        registry.register(
-                new ExtendedMetadataBuilder()
-                        .withName(name)
-                        .withType(MetricType.GAUGE)
-                        .withDescription(description)
-                        .skipsScopeInOpenMetricsExportCompletely(true)
-                        .prependsScopeToOpenMetricsName(false)
-                        .build(),
-                (Gauge<Number>) () -> extractCountFromLinkHeader(url),
-                tags);
-    }
-    private void registerMetric(String name, String description, URL baseURL, URL decrementURL, MetricRegistry registry, Tag... tags) {
-        registry.register(
-                new ExtendedMetadataBuilder()
-                        .withName(name)
-                        .withType(MetricType.GAUGE)
-                        .withDescription(description)
-                        .skipsScopeInOpenMetricsExportCompletely(true)
-                        .prependsScopeToOpenMetricsName(false)
-                        .build(),
-                (Gauge<Number>) () -> extractCountFromLinkHeader(baseURL) - extractCountFromLinkHeader(decrementURL),
-                tags);
+        if (url.getPath().contains("/search/issues")) {
+            registry.register(
+                    new ExtendedMetadataBuilder()
+                            .withName(name)
+                            .withType(MetricType.GAUGE)
+                            .withDescription(description)
+                            .skipsScopeInOpenMetricsExportCompletely(true)
+                            .prependsScopeToOpenMetricsName(false)
+                            .build(),
+                    (Gauge<Number>) () -> extractCountFromJSON(url),
+                    tags);
+        } else {
+            registry.register(
+                    new ExtendedMetadataBuilder()
+                            .withName(name)
+                            .withType(MetricType.GAUGE)
+                            .withDescription(description)
+                            .skipsScopeInOpenMetricsExportCompletely(true)
+                            .prependsScopeToOpenMetricsName(false)
+                            .build(),
+                    (Gauge<Number>) () -> extractCountFromLinkHeader(url),
+                    tags);
+        }
     }
 
     private int extractCountFromLinkHeader(URL url) {
@@ -138,6 +130,22 @@ https://api.github.com/search/issues?q=repo:quarkusio/quarkus+is:issue+is:closed
             // 0 PRs => no content + no link, 1 PR  => content + no link, example: 0 => 2, 1 => 14685
             count = con.getContentLength() > 10 ? 1 : 0;
         }
+        } catch (IOException e) {
+            log.error("Unable to get expected data from URL " + url, e);
+        } finally {
+            con.disconnect();
+        }
+        return count;
+    }
+    private int extractCountFromJSON(URL url) {
+        int count = 0;
+        HttpURLConnection con = null;
+        try {
+            con = (HttpURLConnection) url.openConnection();
+            con.setRequestProperty("Authorization", "token " + gitHubToken);
+            JsonReader jsonReader = Json.createReader(con.getInputStream());
+            JsonObject rootJSON = jsonReader.readObject();
+            count = rootJSON.getInt("total_count");
         } catch (IOException e) {
             log.error("Unable to get expected data from URL " + url, e);
         } finally {
