@@ -60,12 +60,20 @@ public class GHRepositoryAdvancedMetrics {
             registerMetric("gh_repo_commits", "Total number of commits for given repository", commitsURL, registry, tags);
             registerMetric("gh_repo_tags", "Total number of tags/releases for given repository", tagsURL, registry, tags);
 
-            for (String state : issueStates) {
-                registerMetric(registry, repositoryName, "issue", state, tags);
-            }
-            for (String state : prStates) {
-                registerMetric(registry, repositoryName, "pr", state, tags);
-            }
+            URL openIssuesURL = new URL("https://api.github.com/search/issues?q=repo:" + repositoryName + "+is:issue+is:open&per_page=1");
+            URL closedIssuesURL = new URL("https://api.github.com/search/issues?q=repo:" + repositoryName + "+is:issue+is:closed&per_page=1");
+
+            registerMetric("gh_repo_open_issues", "Total number of open issues for given repository", openIssuesURL, registry, tags);
+            registerMetric("gh_repo_closed_issues", "Total number of closed issues for given repository", closedIssuesURL, registry, tags);
+
+            URL openPRsURL = new URL("https://api.github.com/repos/" + repositoryName + "/pulls?per_page=1");
+            URL closedPRsURL = new URL("https://api.github.com/repos/" + repositoryName + "/pulls?per_page=1&state=closed");
+            URL mergedPRsURL = new URL("https://api.github.com/search/issues?q=repo:" + repositoryName + "+is:pr+is:merged&per_page=1");
+
+            registerMetric("gh_repo_open_prs", "Total number of open prs for given repository", openPRsURL, registry, tags);
+            registerMetric("gh_repo_closed_prs", "Total number of closed prs for given repository", closedPRsURL, registry, tags);
+            registerMetric("gh_repo_merged_prs", "Total number of merged prs for given repository", mergedPRsURL, registry, tags);
+
         } catch (MalformedURLException e) {
             log.error("Malformed URL", e);
         }
@@ -73,12 +81,15 @@ public class GHRepositoryAdvancedMetrics {
 
     public void ghVerboseMetrics(MetricRegistry registry, String repositoryName, Tag... tags) {
         try {
-            String[] labels = {labelBug, labelEnhancement, labelEpic, labelProposal, labelQuestion};
+            String[] issueLabels = {labelBug, labelEnhancement, labelEpic, labelProposal, labelQuestion};
+            String[] prLabels = {labelBug, labelEnhancement};
 
-            for (String label : labels) {
+            for (String label : issueLabels) {
                 for (String state : issueStates) {
                     registerMetric(registry, repositoryName, "issue", state, label, tags);
                 }
+            }
+            for (String label : prLabels) {
                 for (String state : prStates) {
                     registerMetric(registry, repositoryName, "pr", state, label, tags);
                 }
@@ -97,16 +108,6 @@ public class GHRepositoryAdvancedMetrics {
           - per label
           - per more labels
         */
-
-    private void registerMetric(MetricRegistry registry, String repositoryName, String type, String state, Tag... tags) throws MalformedURLException {
-        URL url = new URL("https://api.github.com/search/issues?q=repo:" + repositoryName +
-                "+is:" + type +
-                "+is:" + state +
-                "&per_page=1");
-        registerMetric("gh_repo_" + state + "_" + type + "s",
-                "Total number of " + state + " " + type + "s for given repository",
-                url, registry, tags);
-    }
 
     private void registerMetric(MetricRegistry registry, String repositoryName, String type, String state, String label, Tag... tags) throws MalformedURLException {
         List<Tag> tagsList = new ArrayList<>();
