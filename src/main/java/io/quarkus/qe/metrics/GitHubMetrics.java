@@ -15,7 +15,6 @@ import java.util.List;
 @ApplicationScoped
 public class GitHubMetrics {
 
-//    @ConfigProperty(name = "gh.repos", defaultValue = "quarkusio/quarkus, quarkusio/quarkus-quickstarts, quarkusio/quarkusio.github.io")
     @ConfigProperty(name = "gh.repos", defaultValue = "quarkusio/quarkus")
     public List<String> ghRepos;
 
@@ -37,7 +36,7 @@ public class GitHubMetrics {
     private static final Logger log = Logger.getLogger(GitHubMetrics.class);
 
     void onStart(@Observes StartupEvent ev) throws IOException {
-        log.info("The application is starting in GitHub details level " + ghDetailsLevel);
+        log.info("The application is starting in " + ghDetailsLevel + " details level");
 
         ghRepositoryBaseMetrics.initiateGH(ghToken);
         if (! ghRepositoryBaseMetrics.isGHInitiated()) {

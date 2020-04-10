@@ -44,7 +44,6 @@ public class GHRepositoryAdvancedMetrics {
     String labelProposal;
 
     String[] issueStates = {"open", "closed"};
-    String[] prStates = {"open", "closed", "merged"};
 
     public void initiateGH(String ghToken) {
         this.ghToken = ghToken;
@@ -82,32 +81,17 @@ public class GHRepositoryAdvancedMetrics {
     public void ghVerboseMetrics(MetricRegistry registry, String repositoryName, Tag... tags) {
         try {
             String[] issueLabels = {labelBug, labelEnhancement, labelEpic, labelProposal, labelQuestion};
-            String[] prLabels = {labelBug, labelEnhancement};
 
             for (String label : issueLabels) {
                 for (String state : issueStates) {
+                    // prometheus =>        gh_repo_open_issues{repo="quarkusio/quarkus",label!~"kind.*"}
                     registerMetric(registry, repositoryName, "issue", state, label, tags);
-                }
-            }
-            for (String label : prLabels) {
-                for (String state : prStates) {
-                    registerMetric(registry, repositoryName, "pr", state, label, tags);
                 }
             }
         } catch (MalformedURLException e) {
             log.error("Malformed URL", e);
         }
     }
-
-        /*
-        prometheus =>                gh_repo_merged_prs{repo="quarkusio/quarkus",label!~"kind.*"}
-
-         Issues / PRs
-          - by one person
-          - by group of people
-          - per label
-          - per more labels
-        */
 
     private void registerMetric(MetricRegistry registry, String repositoryName, String type, String state, String label, Tag... tags) throws MalformedURLException {
         List<Tag> tagsList = new ArrayList<>();

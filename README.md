@@ -130,3 +130,11 @@ gh_repo_stars{repo="quarkusio/quarkus"} 4328.0
 gh_repo_subscribers{repo="quarkusio/quarkus"} 170.0
 gh_repo_tags{repo="quarkusio/quarkus"} 57.0
 ```
+
+## Calls to GitHub Search API
+The Search API has a custom rate limit, you can make up to 30 authenticated requests per minute.
+
+Number of GitHub Search API calls per gh-exporter details level:
+- BASE: 0
+- ADVANCED: 3
+- VERBOSE: 13
