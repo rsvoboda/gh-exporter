@@ -16,6 +16,8 @@ import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.time.Clock;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -88,9 +90,44 @@ public class GHRepositoryAdvancedMetrics {
                     registerMetric(registry, repositoryName, "issue", state, label, tags);
                 }
             }
+
+            String[] issueActions = {"created", "closed"};
+            String[] prActions = {"created", "closed", "merged"};
+
+            for (String action : issueActions) {
+                registerLast24hMetric(registry, repositoryName, "issue", action, tags);
+            }
+            for (String action : prActions) {
+                registerLast24hMetric(registry, repositoryName, "pr", action, tags);
+            }
         } catch (MalformedURLException e) {
             log.error("Malformed URL", e);
         }
+    }
+
+    private void registerLast24hMetric(MetricRegistry registry, String repositoryName, String type, String action, Tag... tags) throws MalformedURLException {
+        String baseURL = "https://api.github.com/search/issues?per_page=1&q=repo:" + repositoryName +
+                "+is:" + type + "+" + action + ":>";     // e.g. "+is:pr+created:>"
+        log.debug("Registering metric for base URL " + baseURL);
+        registry.register(
+                new ExtendedMetadataBuilder()
+                        .withName("gh_repo_" + action + "_" + type + "s_last_24h")
+                        .withType(MetricType.GAUGE)
+                        .withDescription("Total number of " + action + " " + type + "s for given repository in last 24 hours")
+                        .skipsScopeInOpenMetricsExportCompletely(true)
+                        .prependsScopeToOpenMetricsName(false)
+                        .build(),
+                (Gauge<Number>) () -> {
+                    String timeSuffix = LocalDateTime.now(Clock.systemUTC()).minusDays(1).withNano(0).toString();
+                    try {
+                        log.debug(baseURL+timeSuffix);
+                        return extractCountFromJSON(new URL(baseURL+timeSuffix));
+                    } catch (MalformedURLException e) {
+                        log.error("Unable to construct URL " + baseURL+timeSuffix, e);
+                        return 0;
+                    }
+                },
+                tags);
     }
 
     private void registerMetric(MetricRegistry registry, String repositoryName, String type, String state, String label, Tag... tags) throws MalformedURLException {

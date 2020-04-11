@@ -137,4 +137,4 @@ The Search API has a custom rate limit, you can make up to 30 authenticated requ
 Number of GitHub Search API calls per gh-exporter details level:
 - BASE: 0
 - ADVANCED: 3
-- VERBOSE: 13
+- VERBOSE: 18
