@@ -138,3 +138,17 @@ Number of GitHub Search API calls per gh-exporter details level:
 - BASE: 0
 - ADVANCED: 3
 - VERBOSE: 18
+
+## Release
+```bash
+mvn release:prepare
+mvn release:clean
+
+git checkout $TAG
+
+mvn clean package -Dquarkus.container-image.push=true \
+  -Dquarkus.container-image.username=rostasvo \
+  -Dquarkus.container-image.password=$PASSWORD \
+  -Dquarkus.container-image.registry=docker.io \
+  -Dquarkus.container-image.group=rostasvo
+```
