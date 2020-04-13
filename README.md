@@ -86,11 +86,16 @@ VERBOSE
 ```
 # HELP gh_rate_remaining Number of API queries remaining in the current window
 # HELP gh_repo_closed_issues Total number of closed issues for given repository
+# HELP gh_repo_closed_issues_last_24h Total number of closed issues for given repository in last 24 hours
 # HELP gh_repo_closed_prs Total number of closed prs for given repository
+# HELP gh_repo_closed_prs_last_24h Total number of closed prs for given repository in last 24 hours
 # HELP gh_repo_commits Total number of commits for given repository
 # HELP gh_repo_contributors Total number of contributors for given repository
+# HELP gh_repo_created_issues_last_24h Total number of created issues for given repository in last 24 hours
+# HELP gh_repo_created_prs_last_24h Total number of created prs for given repository in last 24 hours
 # HELP gh_repo_forks Total number of forks for given repository
 # HELP gh_repo_merged_prs Total number of merged prs for given repository
+# HELP gh_repo_merged_prs_last_24h Total number of merged prs for given repository in last 24 hours
 # HELP gh_repo_open_issues Total number of open issues for given repository
 # HELP gh_repo_open_issues_and_prs Total number of open issues and PRs for given repository
 # HELP gh_repo_open_prs Total number of open prs for given repository
@@ -100,18 +105,23 @@ VERBOSE
 # HELP gh_repo_tags Total number of tags/releases for given repository
 
 gh_rate_remaining 4885.0
+gh_repo_closed_issues_last_24h{repo="quarkusio/quarkus"} 2.0
 gh_repo_closed_issues{label="kind/bug",repo="quarkusio/quarkus"} 1309.0
 gh_repo_closed_issues{label="kind/enhancement",repo="quarkusio/quarkus"} 582.0
 gh_repo_closed_issues{label="kind/epic",repo="quarkusio/quarkus"} 25.0
 gh_repo_closed_issues{label="kind/extension-proposal",repo="quarkusio/quarkus"} 14.0
 gh_repo_closed_issues{label="kind/question",repo="quarkusio/quarkus"} 168.0
 gh_repo_closed_issues{repo="quarkusio/quarkus"} 2804.0
+gh_repo_closed_prs_last_24h{repo="quarkusio/quarkus"} 2.0
 gh_repo_closed_prs{label="kind/bug",repo="quarkusio/quarkus"} 110.0
 gh_repo_closed_prs{label="kind/enhancement",repo="quarkusio/quarkus"} 145.0
 gh_repo_closed_prs{repo="quarkusio/quarkus"} 4621.0
 gh_repo_commits{repo="quarkusio/quarkus"} 11016.0
 gh_repo_contributors{repo="quarkusio/quarkus"} 261.0
+gh_repo_created_issues_last_24h{repo="quarkusio/quarkus"} 3.0
+gh_repo_created_prs_last_24h{repo="quarkusio/quarkus"} 6.0
 gh_repo_forks{repo="quarkusio/quarkus"} 788.0
+gh_repo_merged_prs_last_24h{repo="quarkusio/quarkus"} 1.0
 gh_repo_merged_prs{label="kind/bug",repo="quarkusio/quarkus"} 108.0
 gh_repo_merged_prs{label="kind/enhancement",repo="quarkusio/quarkus"} 136.0
 gh_repo_merged_prs{repo="quarkusio/quarkus"} 4103.0
