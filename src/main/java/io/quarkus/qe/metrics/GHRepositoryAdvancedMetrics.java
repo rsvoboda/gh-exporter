@@ -44,6 +44,10 @@ public class GHRepositoryAdvancedMetrics {
     String labelEnhancement;
     @ConfigProperty(name = "gh.label.proposal  ", defaultValue = "kind/extension-proposal")
     String labelProposal;
+    @ConfigProperty(name = "gh.label.invalid", defaultValue = "triage/invalid")
+    String labelInvalid;
+    @ConfigProperty(name = "gh.label.duplicate  ", defaultValue = "triage/duplicate")
+    String labelDuplicate;
 
     String[] issueStates = {"open", "closed"};
 
@@ -89,6 +93,12 @@ public class GHRepositoryAdvancedMetrics {
                     // prometheus =>        gh_repo_open_issues{repo="quarkusio/quarkus",label!~"kind.*"}
                     registerMetric(registry, repositoryName, "issue", state, label, tags);
                 }
+            }
+
+            String[] closedOnlyLabels = {labelInvalid, labelDuplicate};
+            for (String label : closedOnlyLabels) {
+                registerMetric(registry, repositoryName, "issue", "closed", label, tags);
+                registerMetric(registry, repositoryName, "pr", "closed", label, tags);
             }
 
             String[] issueActions = {"created", "closed"};

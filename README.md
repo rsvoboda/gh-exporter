@@ -111,10 +111,12 @@ gh_repo_closed_issues{label="kind/enhancement",repo="quarkusio/quarkus"} 582.0
 gh_repo_closed_issues{label="kind/epic",repo="quarkusio/quarkus"} 25.0
 gh_repo_closed_issues{label="kind/extension-proposal",repo="quarkusio/quarkus"} 14.0
 gh_repo_closed_issues{label="kind/question",repo="quarkusio/quarkus"} 168.0
+gh_repo_closed_issues{label="triage/duplicate",repo="quarkusio/quarkus"} 121.0
+gh_repo_closed_issues{label="triage/invalid",repo="quarkusio/quarkus"} 239.0
 gh_repo_closed_issues{repo="quarkusio/quarkus"} 2804.0
 gh_repo_closed_prs_last_24h{repo="quarkusio/quarkus"} 2.0
-gh_repo_closed_prs{label="kind/bug",repo="quarkusio/quarkus"} 110.0
-gh_repo_closed_prs{label="kind/enhancement",repo="quarkusio/quarkus"} 145.0
+gh_repo_closed_prs{label="triage/duplicate",repo="quarkusio/quarkus"} 11.0
+gh_repo_closed_prs{label="triage/invalid",repo="quarkusio/quarkus"} 378.0
 gh_repo_closed_prs{repo="quarkusio/quarkus"} 4621.0
 gh_repo_commits{repo="quarkusio/quarkus"} 11016.0
 gh_repo_contributors{repo="quarkusio/quarkus"} 261.0
@@ -122,8 +124,6 @@ gh_repo_created_issues_last_24h{repo="quarkusio/quarkus"} 3.0
 gh_repo_created_prs_last_24h{repo="quarkusio/quarkus"} 6.0
 gh_repo_forks{repo="quarkusio/quarkus"} 788.0
 gh_repo_merged_prs_last_24h{repo="quarkusio/quarkus"} 1.0
-gh_repo_merged_prs{label="kind/bug",repo="quarkusio/quarkus"} 108.0
-gh_repo_merged_prs{label="kind/enhancement",repo="quarkusio/quarkus"} 136.0
 gh_repo_merged_prs{repo="quarkusio/quarkus"} 4103.0
 gh_repo_open_issues_and_prs{repo="quarkusio/quarkus"} 1026.0
 gh_repo_open_issues{label="kind/bug",repo="quarkusio/quarkus"} 343.0
@@ -132,8 +132,6 @@ gh_repo_open_issues{label="kind/epic",repo="quarkusio/quarkus"} 35.0
 gh_repo_open_issues{label="kind/extension-proposal",repo="quarkusio/quarkus"} 31.0
 gh_repo_open_issues{label="kind/question",repo="quarkusio/quarkus"} 34.0
 gh_repo_open_issues{repo="quarkusio/quarkus"} 925.0
-gh_repo_open_prs{label="kind/bug",repo="quarkusio/quarkus"} 0.0
-gh_repo_open_prs{label="kind/enhancement",repo="quarkusio/quarkus"} 3.0
 gh_repo_open_prs{repo="quarkusio/quarkus"} 101.0
 gh_repo_size{repo="quarkusio/quarkus"} 50593.0
 gh_repo_stars{repo="quarkusio/quarkus"} 4328.0
@@ -147,7 +145,7 @@ The Search API has a custom rate limit, you can make up to 30 authenticated requ
 Number of GitHub Search API calls per gh-exporter details level:
 - BASE: 0
 - ADVANCED: 3
-- VERBOSE: 18
+- VERBOSE: 22
 
 ## Release
 ```bash
