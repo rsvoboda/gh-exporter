@@ -33,6 +33,9 @@ public class GitHubMetrics {
     @Inject
     GHRepositoryAdvancedMetrics ghRepositoryAdvancedMetrics;
 
+    @Inject
+    GHRepositoryCustomMetrics ghRepositoryCustomMetrics;
+
     private static final Logger log = Logger.getLogger(GitHubMetrics.class);
 
     void onStart(@Observes StartupEvent ev) throws IOException {
@@ -43,6 +46,7 @@ public class GitHubMetrics {
             return;
         }
         ghRepositoryAdvancedMetrics.initiateGH(ghToken);
+        ghRepositoryCustomMetrics.initiateGH(ghToken);
 
         for (String repo : ghRepos) {
             String repositoryName = repo.trim();
@@ -50,9 +54,16 @@ public class GitHubMetrics {
             log.info("Processing: '" + repositoryName + "'");
 
             switch (ghDetailsLevel) {
-                case VERBOSE: ghRepositoryAdvancedMetrics.ghVerboseMetrics(registry, repositoryName, repositoryTag);
-                case ADVANCED: ghRepositoryAdvancedMetrics.ghAdvancedMetrics(registry, repositoryName, repositoryTag);
-                case BASE: ghRepositoryBaseMetrics.ghBaseMetrics(registry, repositoryName, repositoryTag);
+                case VERBOSE:
+                    ghRepositoryAdvancedMetrics.ghVerboseMetrics(registry, repositoryName, repositoryTag);
+                case ADVANCED:
+                    ghRepositoryAdvancedMetrics.ghAdvancedMetrics(registry, repositoryName, repositoryTag);
+                case BASE:
+                    ghRepositoryBaseMetrics.ghBaseMetrics(registry, repositoryName, repositoryTag);
+                    break;
+                case CUSTOM:
+                    ghRepositoryCustomMetrics.ghCustomMetrics(registry, repositoryName, repositoryTag);
+                    break;
             }
         }
 
@@ -62,6 +73,7 @@ public class GitHubMetrics {
     enum GHDetailsLevel {
         BASE,
         ADVANCED,
-        VERBOSE
+        VERBOSE,
+        CUSTOM
     }
 }

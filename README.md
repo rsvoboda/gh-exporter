@@ -19,7 +19,7 @@ docker run --env GH_TOKEN=CHANGE_ME -i --rm -p 8080:8080 rostasvo/gh-exporter:1.
 ## Metrics
 All metrics have type `gauge`, there are 3 levels of details which can be reported.
 
-BASE
+###BASE
 ```
 # HELP gh_rate_remaining Number of API queries remaining in the current window
 # HELP gh_repo_forks Total number of forks for given repository
@@ -34,9 +34,8 @@ gh_repo_open_issues_and_prs{repo="quarkusio/quarkus-http"} 1.0
 gh_repo_size{repo="quarkusio/quarkus-http"} 11184.0
 gh_repo_stars{repo="quarkusio/quarkus-http"} 11.0
 gh_repo_subscribers{repo="quarkusio/quarkus-http"} 18.0
-
 ```
-ADVANCED
+###ADVANCED
 ```
 # HELP gh_rate_remaining Number of API queries remaining in the current window
 # HELP gh_repo_closed_issues Total number of closed issues for given repository
@@ -80,9 +79,8 @@ gh_repo_subscribers{repo="quarkusio/quarkus-quickstarts"} 52.0
 gh_repo_subscribers{repo="quarkusio/quarkusio.github.io"} 24.0
 gh_repo_tags{repo="quarkusio/quarkus-quickstarts"} 49.0
 gh_repo_tags{repo="quarkusio/quarkusio.github.io"} 0.0
-
 ```
-VERBOSE
+###VERBOSE
 ```
 # HELP gh_rate_remaining Number of API queries remaining in the current window
 # HELP gh_repo_closed_issues Total number of closed issues for given repository
@@ -138,6 +136,29 @@ gh_repo_stars{repo="quarkusio/quarkus"} 4328.0
 gh_repo_subscribers{repo="quarkusio/quarkus"} 170.0
 gh_repo_tags{repo="quarkusio/quarkus"} 57.0
 ```
+###CUSTOM
+```
+# HELP gh_rate_remaining Number of API queries remaining in the current window
+# HELP gh_repo_closed_issues Total number of closed issues for given repository
+# HELP gh_repo_open_issues Total number of open issues for given repository
+```
+Example for
+```properties
+gh.repos=quarkusio/quarkus
+gh.details.level=CUSTOM
+gh.open.issues=\
+  label:priority/blocker
+gh.closed.issues=${gh.open.issues},\
+  label:kind/bug+-label:triage/invalid+-label:triage/duplicate,\
+  label:kind/enhancement+-label:triage/invalid+-label:triage/duplicate
+```
+configuration:
+```
+gh_repo_closed_issues{label="label:kind/bug+-label:triage/invalid+-label:triage/duplicate",repo="quarkusio/quarkus"} 1229.0
+gh_repo_closed_issues{label="label:kind/enhancement+-label:triage/invalid+-label:triage/duplicate",repo="quarkusio/quarkus"} 571.0
+gh_repo_closed_issues{label="label:priority/blocker",repo="quarkusio/quarkus"} 4.0
+gh_repo_open_issues{label="label:priority/blocker",repo="quarkusio/quarkus"} 1.0
+```
 
 ## Calls to GitHub Search API
 The Search API has a custom rate limit, you can make up to 30 authenticated requests per minute.
@@ -146,6 +167,7 @@ Number of GitHub Search API calls per gh-exporter details level:
 - BASE: 0
 - ADVANCED: 3
 - VERBOSE: 22
+- CUSTOM: `gh.open.issues` + `gh.closed.issues` entries
 
 ## Release
 ```bash
