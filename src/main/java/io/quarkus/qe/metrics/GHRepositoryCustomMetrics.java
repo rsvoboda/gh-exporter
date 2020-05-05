@@ -10,11 +10,6 @@ import org.jboss.logging.Logger;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
-import javax.json.Json;
-import javax.json.JsonObject;
-import javax.json.JsonReader;
-import java.io.IOException;
-import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -88,32 +83,8 @@ public class GHRepositoryCustomMetrics {
                         .skipsScopeInOpenMetricsExportCompletely(true)
                         .prependsScopeToOpenMetricsName(false)
                         .build(),
-                (Gauge<Number>) () -> extractCountFromJSON(url),
+                (Gauge<Number>) () -> GHUtils.extractCountFromJSON(ghToken, url),
                 tags);
     }
 
-    private int extractCountFromJSON(URL url) {
-        int count = 0;
-        HttpURLConnection con = null;
-        try {
-            con = (HttpURLConnection) url.openConnection();
-            con.setRequestProperty("Authorization", "token " + ghToken);
-            con.setRequestProperty("User-Agent", "github-metrics");
-            JsonReader jsonReader = Json.createReader(con.getInputStream());
-            JsonObject rootJSON = jsonReader.readObject();
-            count = rootJSON.getInt("total_count");
-        } catch (IOException e) {
-            log.error("Unable to get expected data from URL " + url, e);
-            dumpHeaders(con);
-        } finally {
-            con.disconnect();
-        }
-        return count;
-    }
-
-    private void dumpHeaders(HttpURLConnection con) {
-        con.getHeaderFields().forEach((key,value)-> {
-            System.out.println(key + ": " + value);
-        });
-    }
 }

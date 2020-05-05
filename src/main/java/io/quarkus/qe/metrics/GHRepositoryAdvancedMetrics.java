@@ -9,11 +9,6 @@ import org.eclipse.microprofile.metrics.Tag;
 import org.jboss.logging.Logger;
 
 import javax.enterprise.context.ApplicationScoped;
-import javax.json.Json;
-import javax.json.JsonObject;
-import javax.json.JsonReader;
-import java.io.IOException;
-import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.time.Clock;
@@ -131,7 +126,7 @@ public class GHRepositoryAdvancedMetrics {
                     String timeSuffix = LocalDateTime.now(Clock.systemUTC()).minusDays(1).withNano(0).toString();
                     try {
                         log.debug(baseURL+timeSuffix);
-                        return extractCountFromJSON(new URL(baseURL+timeSuffix));
+                        return GHUtils.extractCountFromJSON(ghToken, new URL(baseURL+timeSuffix));
                     } catch (MalformedURLException e) {
                         log.error("Unable to construct URL " + baseURL+timeSuffix, e);
                         return 0;
@@ -165,7 +160,7 @@ public class GHRepositoryAdvancedMetrics {
                             .skipsScopeInOpenMetricsExportCompletely(true)
                             .prependsScopeToOpenMetricsName(false)
                             .build(),
-                    (Gauge<Number>) () -> extractCountFromJSON(url),
+                    (Gauge<Number>) () -> GHUtils.extractCountFromJSON(ghToken, url),
                     tags);
         } else {
             registry.register(
@@ -176,60 +171,8 @@ public class GHRepositoryAdvancedMetrics {
                             .skipsScopeInOpenMetricsExportCompletely(true)
                             .prependsScopeToOpenMetricsName(false)
                             .build(),
-                    (Gauge<Number>) () -> extractCountFromLinkHeader(url),
+                    (Gauge<Number>) () -> GHUtils.extractCountFromLinkHeader(ghToken, url),
                     tags);
         }
-    }
-
-    private int extractCountFromLinkHeader(URL url) {
-        int count = 0;
-        HttpURLConnection con = null;
-        try {
-            con = (HttpURLConnection) url.openConnection();
-        con.setRequestProperty("Authorization", "token " + ghToken);
-        con.setRequestProperty("User-Agent", "github-metrics");
-        String link = con.getHeaderField("Link");
-        if (link != null) {
-            // extract page from Link
-            // <https://api.github.com/repositories/139914932/pulls?per_page=1&page=2>; rel="next", <https://api.github.com/repositories/139914932/pulls?per_page=1&page=90>; rel="last"
-            String countString = link.substring(link.lastIndexOf("&page=")+6);
-            countString = countString.substring(0,countString.lastIndexOf(">"));
-            count = Integer.parseInt(countString);
-        } else {
-            // 0 PRs => no content + no link, 1 PR  => content + no link, example: 0 => 2, 1 => 14685
-            count = con.getContentLength() > 10 ? 1 : 0;
-        }
-        } catch (IOException e) {
-            log.error("Unable to get expected data from URL " + url, e);
-            dumpHeaders(con);
-        } finally {
-            con.disconnect();
-        }
-        return count;
-    }
-
-    private int extractCountFromJSON(URL url) {
-        int count = 0;
-        HttpURLConnection con = null;
-        try {
-            con = (HttpURLConnection) url.openConnection();
-            con.setRequestProperty("Authorization", "token " + ghToken);
-            con.setRequestProperty("User-Agent", "github-metrics");
-            JsonReader jsonReader = Json.createReader(con.getInputStream());
-            JsonObject rootJSON = jsonReader.readObject();
-            count = rootJSON.getInt("total_count");
-        } catch (IOException e) {
-            log.error("Unable to get expected data from URL " + url, e);
-            dumpHeaders(con);
-        } finally {
-            con.disconnect();
-        }
-        return count;
-    }
-
-    private void dumpHeaders(HttpURLConnection con) {
-        con.getHeaderFields().forEach((key,value)-> {
-            System.out.println(key + ": " + value);
-        });
     }
 }

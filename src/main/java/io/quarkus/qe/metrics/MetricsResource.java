@@ -1,12 +1,7 @@
 package io.quarkus.qe.metrics;
 
-import io.smallrye.metrics.ExtendedMetadata;
-import io.smallrye.metrics.MetricRegistries;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
-import org.eclipse.microprofile.metrics.Gauge;
-import org.eclipse.microprofile.metrics.Metadata;
 import org.eclipse.microprofile.metrics.MetricRegistry;
-import org.eclipse.microprofile.metrics.MetricType;
 import org.kohsuke.github.GHRepository;
 import org.kohsuke.github.GitHub;
 import org.kohsuke.github.GitHubBuilder;
@@ -18,7 +13,6 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import java.io.IOException;
 import java.util.List;
-import java.util.Optional;
 
 @Path("/gh")
 public class MetricsResource {
