@@ -19,7 +19,7 @@ docker run --env GH_TOKEN=CHANGE_ME -i --rm -p 8080:8080 rostasvo/gh-exporter:1.
 ## Metrics
 All metrics have type `gauge`, there are 3 levels of details which can be reported.
 
-###BASE
+### BASE
 ```
 # HELP gh_rate_remaining Number of API queries remaining in the current window
 # HELP gh_repo_forks Total number of forks for given repository
@@ -35,7 +35,7 @@ gh_repo_size{repo="quarkusio/quarkus-http"} 11184.0
 gh_repo_stars{repo="quarkusio/quarkus-http"} 11.0
 gh_repo_subscribers{repo="quarkusio/quarkus-http"} 18.0
 ```
-###ADVANCED
+### ADVANCED
 ```
 # HELP gh_rate_remaining Number of API queries remaining in the current window
 # HELP gh_repo_closed_issues Total number of closed issues for given repository
@@ -80,7 +80,7 @@ gh_repo_subscribers{repo="quarkusio/quarkusio.github.io"} 24.0
 gh_repo_tags{repo="quarkusio/quarkus-quickstarts"} 49.0
 gh_repo_tags{repo="quarkusio/quarkusio.github.io"} 0.0
 ```
-###VERBOSE
+### VERBOSE
 ```
 # HELP gh_rate_remaining Number of API queries remaining in the current window
 # HELP gh_repo_closed_issues Total number of closed issues for given repository
@@ -136,7 +136,7 @@ gh_repo_stars{repo="quarkusio/quarkus"} 4328.0
 gh_repo_subscribers{repo="quarkusio/quarkus"} 170.0
 gh_repo_tags{repo="quarkusio/quarkus"} 57.0
 ```
-###CUSTOM
+### CUSTOM
 ```
 # HELP gh_rate_remaining Number of API queries remaining in the current window
 # HELP gh_repo_closed_issues Total number of closed issues for given repository

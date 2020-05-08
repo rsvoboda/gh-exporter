@@ -63,4 +63,26 @@ public class GHUtils {
         }
         return count;
     }
+
+    public static JsonObject getJsonObject(String ghToken, String address) {
+        HttpURLConnection con = null;
+        try {
+            URL url = new URL(address);
+            con = (HttpURLConnection) url.openConnection();
+            con.setRequestProperty("Authorization", "token " + ghToken);
+            con.setRequestProperty("User-Agent", "github-metrics");
+            JsonReader jsonReader = Json.createReader(con.getInputStream());
+            return jsonReader.readObject();
+        } catch (IOException e) {
+            log.error("Unable to get JsonObject data from URL " + address, e);
+            dumpHeaders(con);
+            return null;
+        } finally {
+            con.disconnect();
+        }
+    }
+
+    public static boolean isTokenValid(String ghToken) {
+        return getJsonObject(ghToken, "https://api.github.com/") != null;
+    }
 }

@@ -10,10 +10,10 @@
     <maven.compiler.release>11</maven.compiler.release>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-    <quarkus-plugin.version>1.4.1.Final</quarkus-plugin.version>
+    <quarkus-plugin.version>1.4.2.Final</quarkus-plugin.version>
     <quarkus.platform.artifact-id>quarkus-universe-bom</quarkus.platform.artifact-id>
     <quarkus.platform.group-id>io.quarkus</quarkus.platform.group-id>
-    <quarkus.platform.version>1.4.1.Final</quarkus.platform.version>
+    <quarkus.platform.version>1.4.2.Final</quarkus.platform.version>
     <release-plugin.version>3.0.0-M1</release-plugin.version>
     <surefire-plugin.version>2.22.1</surefire-plugin.version>
   </properties>
@@ -55,11 +55,6 @@
       <groupId>io.rest-assured</groupId>
       <artifactId>rest-assured</artifactId>
       <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.kohsuke</groupId>
-      <artifactId>github-api</artifactId>
-      <version>1.108</version>
     </dependency>
     <dependency>
       <groupId>io.quarkus</groupId>
@@ -131,6 +126,7 @@
       </build>
       <properties>
         <quarkus.package.type>native</quarkus.package.type>
+        <quarkus.native.enable-https-url-handler>true</quarkus.native.enable-https-url-handler>
       </properties>
     </profile>
   </profiles>
