@@ -7,9 +7,12 @@ import org.eclipse.microprofile.metrics.MetricRegistry;
 import org.eclipse.microprofile.metrics.MetricType;
 import org.eclipse.microprofile.metrics.Tag;
 import org.jboss.logging.Logger;
+import org.kohsuke.github.GHRepository;
+import org.kohsuke.github.GitHub;
+import org.kohsuke.github.GitHubBuilder;
 
 import javax.enterprise.context.ApplicationScoped;
-import javax.json.JsonObject;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -20,14 +23,18 @@ import java.util.Map;
 public class GHRepositoryBaseMetrics {
 
     private static final Logger log = Logger.getLogger(GHRepositoryBaseMetrics.class);
-    private String ghToken;
+    private GitHub github;
 
     public void initiateGH(String ghToken) {
-        this.ghToken = ghToken;
+        try {
+            github = new GitHubBuilder().withOAuthToken(ghToken).build();
+        } catch (IOException e) {
+            log.error("Token was rejected", e);
+        }
     }
 
     public boolean isGHInitiated() {
-        return GHUtils.isTokenValid(ghToken);
+        return github != null;
     }
 
     public void ghBaseMetrics(MetricRegistry registry, String repositoryName, Tag... tags) {
@@ -96,36 +103,15 @@ public class GHRepositoryBaseMetrics {
                         .skipsScopeInOpenMetricsExportCompletely(true)
                         .prependsScopeToOpenMetricsName(false)
                         .build(),
-                (Gauge<Number>) () -> getRemainingRateLimit()
+                (Gauge<Number>) () -> {
+                    try {
+                        return github.getRateLimit().getRemaining();
+                    } catch (IOException e) {
+                        log.error(e.getMessage(), e);
+                        return 0;
+                    }
+                }
         );
-    }
-
-    class GHRepository {
-        private final JsonObject rootJSON;
-
-        public GHRepository(JsonObject rootJSON) {
-            this.rootJSON = rootJSON;
-        }
-        public Number getStargazersCount() {
-            return rootJSON.getInt("stargazers_count");
-        }
-        public Number getOpenIssueCount() {
-            return rootJSON.getInt("open_issues_count");
-        }
-        public Number getForksCount() {
-            return rootJSON.getInt("forks_count");
-        }
-        public Number getSubscribersCount() {
-            return rootJSON.getInt("subscribers_count");
-        }
-        public Number getSize() {
-            return rootJSON.getInt("size");
-        }
-    }
-
-    public Number getRemainingRateLimit() {
-        JsonObject rootJSON = GHUtils.getJsonObject(ghToken, "https://api.github.com/rate_limit");
-        return rootJSON.getJsonObject("rate").getInt("remaining");
     }
 
     Map<String, GHRepository> repositoryMap = new HashMap<>();
@@ -137,17 +123,16 @@ public class GHRepositoryBaseMetrics {
         }
     }
     private GHRepository getGHRepository(String name) {
-        GHRepository repository = repositoryMap.get(name);
-        if (repository == null) {
-            repository = getRepository(name);
-            repositoryMap.put(name, repository);
+        try {
+            GHRepository repository = repositoryMap.get(name);
+            if (repository == null) {
+                repository = github.getRepository(name);
+                repositoryMap.put(name, repository);
+            }
+            return repository;
+        } catch (IOException e) {
+            log.error(e.getMessage(), e);
+            return null;
         }
-        return repository;
-    }
-
-    private GHRepository getRepository(String repositoryName) {
-        JsonObject rootJSON =
-                GHUtils.getJsonObject(ghToken, "https://api.github.com/repos/" + repositoryName);
-        return new GHRepository(rootJSON);
     }
 }
