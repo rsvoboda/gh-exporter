@@ -2,6 +2,7 @@ package io.quarkus.qe.metrics;
 
 import io.quarkus.scheduler.Scheduled;
 import io.smallrye.metrics.ExtendedMetadataBuilder;
+import okhttp3.OkHttpClient;
 import org.eclipse.microprofile.metrics.Gauge;
 import org.eclipse.microprofile.metrics.MetricRegistry;
 import org.eclipse.microprofile.metrics.MetricType;
@@ -10,6 +11,7 @@ import org.jboss.logging.Logger;
 import org.kohsuke.github.GHRepository;
 import org.kohsuke.github.GitHub;
 import org.kohsuke.github.GitHubBuilder;
+import org.kohsuke.github.extras.okhttp3.OkHttpConnector;
 
 import javax.enterprise.context.ApplicationScoped;
 import java.io.IOException;
@@ -27,7 +29,8 @@ public class GHRepositoryBaseMetrics {
 
     public void initiateGH(String ghToken) {
         try {
-            github = new GitHubBuilder().withOAuthToken(ghToken).build();
+            github = new GitHubBuilder().withOAuthToken(ghToken)
+                    .withConnector(new OkHttpConnector(new OkHttpClient())).build();
         } catch (IOException e) {
             log.error("Token was rejected", e);
         }
