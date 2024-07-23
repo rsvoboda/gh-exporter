@@ -170,12 +170,28 @@ Number of GitHub Search API calls per gh-exporter details level:
 - CUSTOM: `gh.open.issues` + `gh.closed.issues` entries
 
 ## Release
+Docker images are supposed to target `linux/amd64` architecture.
+
 ```bash
 mvn release:prepare
 mvn release:clean
 
 git checkout $TAG
 
+mvn clean package -DskipTests -Pnative \
+  -Dquarkus.native.container-build=true \
+  -Dquarkus.native.container-runtime-options=--platform=linux/amd64 \
+  -Dquarkus.podman.platform=linux/amd64 \
+  -Dquarkus.container-image.build=true \
+  -Dquarkus.container-image.push=true \
+  -Dquarkus.container-image.username=rostasvo \
+  -Dquarkus.container-image.password=$PASSWORD \
+  -Dquarkus.container-image.registry=docker.io \
+  -Dquarkus.container-image.group=rostasvo
+```
+
+The following command is sufficient when on an x86_64 machine:
+```bash
 mvn clean package -Dnative -Dquarkus.native.container-build=true \
   -Dquarkus.container-image.build=true \
   -Dquarkus.container-image.push=true \

@@ -57,7 +57,7 @@
     </dependency>
     <dependency>
       <groupId>io.quarkus</groupId>
-      <artifactId>quarkus-container-image-docker</artifactId>
+      <artifactId>quarkus-container-image-podman</artifactId>
     </dependency>
   </dependencies>
   <build>
